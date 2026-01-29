@@ -2,21 +2,119 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ingreso al Sistema</title>
+  <title>Ingreso al Sistema de Legajos Personales</title>
   <link rel="icon" href="data:,">
+  <style>
+    /* Estilo único e inigualable: Tema policial con autoridad y seriedad */
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); /* Gradiente oscuro inspirado en uniformes policiales */
+      color: #ffffff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    .container {
+      background: rgba(0, 0, 0, 0.8); /* Fondo semi-transparente para efecto de "archivo confidencial" */
+      border: 2px solid #00d4ff; /* Borde azul eléctrico para resaltar autoridad */
+      border-radius: 10px;
+      padding: 40px;
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.5); /* Sombra azul para efecto policial */
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      position: relative;
+    }
+    
+    .container::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      background: linear-gradient(45deg, #ff0000, #00d4ff, #ff0000); /* Borde animado con colores de alerta policial */
+      border-radius: 15px;
+      z-index: -1;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+    
+    h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #00d4ff; /* Azul brillante para título */
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+    }
+    
+    .badge {
+      font-size: 14px;
+      margin-bottom: 30px;
+      color: #cccccc;
+      font-style: italic;
+    }
+    
+    button {
+      background: linear-gradient(45deg, #16213e, #0f3460); /* Gradiente para botón */
+      color: #ffffff;
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      font-weight: bold;
+      text-transform: uppercase;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    button:hover {
+      background: linear-gradient(45deg, #0f3460, #16213e);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 212, 255, 0.4);
+    }
+    
+    #msg {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #ff6b6b; /* Rojo para errores */
+      min-height: 20px;
+    }
+    
+    .footer {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #888888;
+    }
+  </style>
 </head>
 <body>
 
-<h2>Login serio</h2>
-<button onclick="loginGoogle()">Ingresar con Google</button>
-
-<p id="msg"></p>
+<div class="container">
+  <h2>Sistema de Legajos Personales</h2>
+  <p class="badge">Acceso Autorizado Solo para Personal Policial</p>
+  <button onclick="loginGoogle()">Ingresar con Google</button>
+  <p id="msg"></p>
+  <div class="footer">© 2023 Departamento de Legajos. Confidencial.</div>
+</div>
 
 <!-- SUPABASE V2 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <script>
-/* crear cliente Supabase */
+/* Crear cliente Supabase */
 const client = supabase.createClient(
   "https://otehkbvjoxxdikfrlldj.supabase.co",
   "sb_publishable_M2pH2HrqRmYEXxgGAnMdRg_Y_7gupVv"
