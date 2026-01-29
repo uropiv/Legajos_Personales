@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Ingreso al Sistema</title>
+  <link rel="icon" href="data:,">
 </head>
 <body>
 
-<h2>Registro</h2>
+<h2>Registro (solo pruebas)</h2>
 <input id="reg-email" placeholder="Email">
 <input id="reg-pass" type="password" placeholder="Contraseña">
 <button onclick="registrar()">Registrarse</button>
@@ -18,48 +19,49 @@
 <input id="log-pass" type="password" placeholder="Contraseña">
 <button onclick="login()">Ingresar</button>
 
+<hr>
+
+<h2>Login serio</h2>
+<button onclick="loginGoogle()">Ingresar con Google</button>
+
 <p id="msg"></p>
 
 <!-- SUPABASE V2 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <script>
-/* crear cliente */
+/* crear cliente Supabase */
 const client = supabase.createClient(
   "https://otehkbvjoxxdikfrlldj.supabase.co",
   "sb_publishable_M2pH2HrqRmYEXxgGAnMdRg_Y_7gupVv"
 );
 
+/* REGISTRO (solo para pruebas) */
 async function registrar() {
   const email = document.getElementById("reg-email").value.trim();
   const pass = document.getElementById("reg-pass").value.trim();
 
   if (!email || !pass) {
-    document.getElementById("msg").innerText = "Completa todos los campos";
+    msg("Completa todos los campos");
     return;
   }
 
   if (pass.length < 6) {
-    document.getElementById("msg").innerText =
-      "La contraseña debe tener al menos 6 caracteres";
+    msg("La contraseña debe tener al menos 6 caracteres");
     return;
   }
 
-  const { error } = await client.auth.signUp({
-    email,
-    password: pass
-  });
-
-  document.getElementById("msg").innerText =
-    error ? error.message : "Registro exitoso (revisá tu email si pide confirmación)";
+  const { error } = await client.auth.signUp({ email, password: pass });
+  msg(error ? error.message : "Registro exitoso");
 }
 
+/* LOGIN EMAIL (backup) */
 async function login() {
   const email = document.getElementById("log-email").value.trim();
   const pass = document.getElementById("log-pass").value.trim();
 
   if (!email || !pass) {
-    document.getElementById("msg").innerText = "Completa todos los campos";
+    msg("Completa todos los campos");
     return;
   }
 
@@ -68,12 +70,28 @@ async function login() {
     password: pass
   });
 
-  document.getElementById("msg").innerText =
-    error ? error.message : "Login correcto";
+  msg(error ? error.message : "Login correcto");
+}
+
+/* LOGIN CON GOOGLE */
+async function loginGoogle() {
+  const { error } = await client.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: window.location.href
+    }
+  });
+
+  if (error) {
+    msg(error.message);
+  }
+}
+
+/* helper mensaje */
+function msg(texto) {
+  document.getElementById("msg").innerText = texto;
 }
 </script>
 
-
 </body>
 </html>
-
