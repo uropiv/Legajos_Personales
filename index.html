@@ -2,60 +2,49 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Legajos – Registro</title>
-
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Ingreso al Sistema</title>
 </head>
-<body class="container mt-4">
+<body>
 
-<h3>Registro de Usuario</h3>
-
-<div class="mb-2">
-  <input id="email" class="form-control" placeholder="Email">
-</div>
-
-<div class="mb-2">
-  <input id="password" type="password" class="form-control" placeholder="Contraseña">
-</div>
-
-<div class="mb-2">
-  <input id="legajo" class="form-control" placeholder="N° de Legajo">
-</div>
-
-<div class="mb-2">
-  <input id="apellido" class="form-control" placeholder="Apellido">
-</div>
-
-<div class="mb-2">
-  <input id="nombre" class="form-control" placeholder="Nombre">
-</div>
-
-<div class="mb-2">
-  <input id="jerarquia" class="form-control" placeholder="Jerarquía">
-</div>
-
-<button onclick="registrar()" class="btn btn-success">
-  Registrar
-</button>
+<h2>Registro</h2>
+<input id="reg-email" placeholder="Email">
+<input id="reg-pass" type="password" placeholder="Contraseña">
+<button onclick="registrar()">Registrarse</button>
 
 <hr>
 
-<h3>Login</h3>
+<h2>Login</h2>
+<input id="log-email" placeholder="Email">
+<input id="log-pass" type="password" placeholder="Contraseña">
+<button onclick="login()">Ingresar</button>
 
-<div class="mb-2">
-  <input id="loginEmail" class="form-control" placeholder="Email">
-</div>
+<p id="msg"></p>
 
-<div class="mb-2">
-  <input id="loginPassword" type="password" class="form-control" placeholder="Contraseña">
-</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabase = supabaseJs.createClient(
+  "https://otehkbvjoxxdikfrlldj.supabase.co",
+  "sb_publishable_M2pH2HrqRmYEXxgGAnMdRg_Y_7gupVv"
+);
 
-<button onclick="login()" class="btn btn-primary">
-  Ingresar
-</button>
+async function registrar() {
+  const email = document.getElementById("reg-email").value;
+  const pass = document.getElementById("reg-pass").value;
 
-<script src="https://cdn.jsdelivr.net/npm/bcryptjs/dist/bcrypt.min.js"></script>
-<script src="app.js"></script>
+  const { error } = await supabase.auth.signUp({ email, password: pass });
+  document.getElementById("msg").innerText =
+    error ? error.message : "Registro exitoso";
+}
+
+async function login() {
+  const email = document.getElementById("log-email").value;
+  const pass = document.getElementById("log-pass").value;
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  document.getElementById("msg").innerText =
+    error ? error.message : "Login correcto";
+}
+</script>
 
 </body>
 </html>
