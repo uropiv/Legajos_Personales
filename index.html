@@ -206,49 +206,57 @@ document.getElementById('jerarquia').addEventListener('change', checkForm);
 
 /* LOGIN CON GOOGLE */
 async function loginGoogle() {
-  // Obtener datos del formulario
   const legajo = document.getElementById('legajo').value.trim();
   const apellidoNombre = document.getElementById('apellidoNombre').value.trim();
   const jerarquia = document.getElementById('jerarquia').value;
   
-  // Verificar nuevamente (por si acaso)
   if (!legajo || !apellidoNombre || !jerarquia) {
     msg('Complete todos los campos antes de ingresar.');
     return;
   }
   
-  // Iniciar OAuth con Google
-  const { data, error } = await client.auth.signInWithOAuth({
+  console.log('Guardando en localStorage:', { legajo, apellidoNombre, jerarquia }); // LOG
+  
+  // Guardar en localStorage para usar después del redirect
+  localStorage.setItem('legajo', legajo);
+  localStorage.setItem('apellidoNombre', apellidoNombre);
+  localStorage.setItem('jerarquia', jerarquia);
+  
+  console.log('Iniciando OAuth con Google...'); // LOG
+  
+  const { error } = await client.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: window.location.href // vuelve a la misma página luego del login
+      redirectTo: window.location.href
     }
   });
   
   if (error) {
+    console.error('Error en OAuth:', error); // LOG
     msg(error.message);
-    return;
   }
-  
-  // Después de OAuth exitoso, insertar datos en la tabla 'profiles'
-  // Nota: El OAuth redirige, así que esta inserción debe manejarse después del redirect.
-  // En la práctica, podrías manejar esto en un listener de auth state change.
-  // Para simplicidad, asumimos que después del redirect, verificamos el estado.
 }
 
-// Listener para cambios en el estado de autenticación (se ejecuta después del redirect)
+/* Listener para cambios en el estado de autenticación */
 client.auth.onAuthStateChange(async (event, session) => {
+  console.log('Auth state changed:', event, session ? 'Sesión activa' : 'Sin sesión'); // LOG
+  
   if (event === 'SIGNED_IN' && session) {
     const user = session.user;
+    console.log('Usuario autenticado:', user.id); // LOG
     
-    // Obtener datos del formulario (almacenados en localStorage para persistencia temporal)
+    // Obtener datos del formulario desde localStorage
     const legajo = localStorage.getItem('legajo');
     const apellidoNombre = localStorage.getItem('apellidoNombre');
     const jerarquia = localStorage.getItem('jerarquia');
     
+    console.log('Datos recuperados de localStorage:', { legajo, apellidoNombre, jerarquia }); // LOG
+    
     if (legajo && apellidoNombre && jerarquia) {
+      console.log('Insertando en profiles...'); // LOG
+      
       // Insertar en la tabla 'profiles'
-      const { error } = await client
+      const { data, error } = await client
         .from('profiles')
         .insert([
           {
@@ -260,47 +268,24 @@ client.auth.onAuthStateChange(async (event, session) => {
         ]);
       
       if (error) {
+        console.error('Error al insertar:', error); // LOG
         msg('Error al guardar el perfil: ' + error.message);
       } else {
+        console.log('Inserción exitosa:', data); // LOG
         msg('Perfil guardado exitosamente. Bienvenido!');
-        // Aquí podrías redirigir a otra página o hacer algo más
+        // Aquí podrías redirigir a otra página, ej. window.location.href = '/dashboard';
       }
       
       // Limpiar localStorage
       localStorage.removeItem('legajo');
       localStorage.removeItem('apellidoNombre');
       localStorage.removeItem('jerarquia');
+    } else {
+      console.warn('Datos incompletos en localStorage'); // LOG
+      msg('Datos del formulario no encontrados. Intente de nuevo.');
     }
   }
 });
-
-/* Modificar loginGoogle para guardar datos en localStorage antes del redirect */
-async function loginGoogle() {
-  const legajo = document.getElementById('legajo').value.trim();
-  const apellidoNombre = document.getElementById('apellidoNombre').value.trim();
-  const jerarquia = document.getElementById('jerarquia').value;
-  
-  if (!legajo || !apellidoNombre || !jerarquia) {
-    msg('Complete todos los campos antes de ingresar.');
-    return;
-  }
-  
-  // Guardar en localStorage para usar después del redirect
-  localStorage.setItem('legajo', legajo);
-  localStorage.setItem('apellidoNombre', apellidoNombre);
-  localStorage.setItem('jerarquia', jerarquia);
-  
-  const { error } = await client.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: window.location.href
-    }
-  });
-  
-  if (error) {
-    msg(error.message);
-  }
-}
 
 /* HELPER: mostrar mensaje */
 function msg(texto) {
@@ -310,3 +295,4 @@ function msg(texto) {
 
 </body>
 </html>
+
