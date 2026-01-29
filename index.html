@@ -7,20 +7,6 @@
 </head>
 <body>
 
-<h2>Registro (solo pruebas)</h2>
-<input id="reg-email" placeholder="Email">
-<input id="reg-pass" type="password" placeholder="Contraseña">
-<button onclick="registrar()">Registrarse</button>
-
-<hr>
-
-<h2>Login</h2>
-<input id="log-email" placeholder="Email">
-<input id="log-pass" type="password" placeholder="Contraseña">
-<button onclick="login()">Ingresar</button>
-
-<hr>
-
 <h2>Login serio</h2>
 <button onclick="loginGoogle()">Ingresar con Google</button>
 
@@ -36,58 +22,19 @@ const client = supabase.createClient(
   "sb_publishable_M2pH2HrqRmYEXxgGAnMdRg_Y_7gupVv"
 );
 
-/* REGISTRO (solo para pruebas) */
-async function registrar() {
-  const email = document.getElementById("reg-email").value.trim();
-  const pass = document.getElementById("reg-pass").value.trim();
-
-  if (!email || !pass) {
-    msg("Completa todos los campos");
-    return;
-  }
-
-  if (pass.length < 6) {
-    msg("La contraseña debe tener al menos 6 caracteres");
-    return;
-  }
-
-  const { error } = await client.auth.signUp({ email, password: pass });
-  msg(error ? error.message : "Registro exitoso");
-}
-
-/* LOGIN EMAIL (backup) */
-async function login() {
-  const email = document.getElementById("log-email").value.trim();
-  const pass = document.getElementById("log-pass").value.trim();
-
-  if (!email || !pass) {
-    msg("Completa todos los campos");
-    return;
-  }
-
-  const { error } = await client.auth.signInWithPassword({
-    email,
-    password: pass
-  });
-
-  msg(error ? error.message : "Login correcto");
-}
-
 /* LOGIN CON GOOGLE */
 async function loginGoogle() {
   const { error } = await client.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: window.location.href
+      redirectTo: window.location.href // vuelve a la misma página luego del login
     }
   });
 
-  if (error) {
-    msg(error.message);
-  }
+  if (error) msg(error.message);
 }
 
-/* helper mensaje */
+/* HELPER: mostrar mensaje */
 function msg(texto) {
   document.getElementById("msg").innerText = texto;
 }
