@@ -66,6 +66,33 @@
       font-style: italic;
     }
     
+    form {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #ffffff;
+      text-align: left;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #00d4ff;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      font-size: 14px;
+    }
+    
+    input::placeholder {
+      color: #cccccc;
+    }
+    
     button {
       background: linear-gradient(45deg, #16213e, #0f3460); /* Gradiente para botón */
       color: #ffffff;
@@ -78,6 +105,13 @@
       cursor: pointer;
       transition: all 0.3s ease;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      opacity: 0.5; /* Deshabilitado inicialmente */
+      pointer-events: none; /* Deshabilitado inicialmente */
+    }
+    
+    button.enabled {
+      opacity: 1;
+      pointer-events: auto;
     }
     
     button:hover {
@@ -105,7 +139,38 @@
 <div class="container">
   <h2>Sistema de Legajos Personales</h2>
   <p class="badge">Acceso Autorizado Solo para Personal Policial</p>
-  <button onclick="loginGoogle()">Ingresar con Google</button>
+  
+  <form id="profileForm">
+    <label for="legajo">Legajo Personal:</label>
+    <input type="text" id="legajo" name="legajo" placeholder="Ingrese su legajo" required>
+    
+    <label for="apellidoNombre">Apellido y Nombre:</label>
+    <input type="text" id="apellidoNombre" name="apellidoNombre" placeholder="Ingrese apellido y nombre" required>
+    
+    <label for="jerarquia">Jerarquía:</label>
+    <select id="jerarquia" name="jerarquia" required>
+      <option value="">Seleccione jerarquía</option>
+      <option value="AGENTE">AGENTE</option>
+      <option value="CABO">CABO</option>
+      <option value="CABO PRIMERO">CABO PRIMERO</option>
+      <option value="SARGENTO">SARGENTO</option>
+      <option value="SARGENTO PRIMERO">SARGENTO PRIMERO</option>
+      <option value="SARGENTO AYUDANTE">SARGENTO AYUDANTE</option>
+      <option value="SUB OFICIAL PRINCIPAL">SUB OFICIAL PRINCIPAL</option>
+      <option value="SUB OFICIAL MAYOR">SUB OFICIAL MAYOR</option>
+      <option value="OFICIAL AYUDANTE">OFICIAL AYUDANTE</option>
+      <option value="OFICIAL SUB INSPECTOR">OFICIAL SUB INSPECTOR</option>
+      <option value="OFICIAL INSPECTOR">OFICIAL INSPECTOR</option>
+      <option value="OFICIAL PRINCIPAL">OFICIAL PRINCIPAL</option>
+      <option value="SUB COMISARIO">SUB COMISARIO</option>
+      <option value="COMISARIO">COMISARIO</option>
+      <option value="COMISARIO INSPECTOR">COMISARIO INSPECTOR</option>
+      <option value="COMISARIO MAYOR">COMISARIO MAYOR</option>
+      <option value="COMISARIO GENERAL">COMISARIO GENERAL</option>
+    </select>
+  </form>
+  
+  <button id="loginBtn" onclick="loginGoogle()">Ingresar con Google</button>
   <p id="msg"></p>
   <div class="footer">© 2023 Departamento de Legajos. Confidencial.</div>
 </div>
@@ -120,16 +185,121 @@ const client = supabase.createClient(
   "sb_publishable_M2pH2HrqRmYEXxgGAnMdRg_Y_7gupVv"
 );
 
+/* Función para verificar si el formulario está completo y habilitar el botón */
+function checkForm() {
+  const legajo = document.getElementById('legajo').value.trim();
+  const apellidoNombre = document.getElementById('apellidoNombre').value.trim();
+  const jerarquia = document.getElementById('jerarquia').value;
+  const btn = document.getElementById('loginBtn');
+  
+  if (legajo && apellidoNombre && jerarquia) {
+    btn.classList.add('enabled');
+  } else {
+    btn.classList.remove('enabled');
+  }
+}
+
+/* Agregar event listeners para validar en tiempo real */
+document.getElementById('legajo').addEventListener('input', checkForm);
+document.getElementById('apellidoNombre').addEventListener('input', checkForm);
+document.getElementById('jerarquia').addEventListener('change', checkForm);
+
 /* LOGIN CON GOOGLE */
 async function loginGoogle() {
-  const { error } = await client.auth.signInWithOAuth({
+  // Obtener datos del formulario
+  const legajo = document.getElementById('legajo').value.trim();
+  const apellidoNombre = document.getElementById('apellidoNombre').value.trim();
+  const jerarquia = document.getElementById('jerarquia').value;
+  
+  // Verificar nuevamente (por si acaso)
+  if (!legajo || !apellidoNombre || !jerarquia) {
+    msg('Complete todos los campos antes de ingresar.');
+    return;
+  }
+  
+  // Iniciar OAuth con Google
+  const { data, error } = await client.auth.signInWithOAuth({
     provider: "google",
     options: {
       redirectTo: window.location.href // vuelve a la misma página luego del login
     }
   });
+  
+  if (error) {
+    msg(error.message);
+    return;
+  }
+  
+  // Después de OAuth exitoso, insertar datos en la tabla 'profiles'
+  // Nota: El OAuth redirige, así que esta inserción debe manejarse después del redirect.
+  // En la práctica, podrías manejar esto en un listener de auth state change.
+  // Para simplicidad, asumimos que después del redirect, verificamos el estado.
+}
 
-  if (error) msg(error.message);
+// Listener para cambios en el estado de autenticación (se ejecuta después del redirect)
+client.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session) {
+    const user = session.user;
+    
+    // Obtener datos del formulario (almacenados en localStorage para persistencia temporal)
+    const legajo = localStorage.getItem('legajo');
+    const apellidoNombre = localStorage.getItem('apellidoNombre');
+    const jerarquia = localStorage.getItem('jerarquia');
+    
+    if (legajo && apellidoNombre && jerarquia) {
+      // Insertar en la tabla 'profiles'
+      const { error } = await client
+        .from('profiles')
+        .insert([
+          {
+            user_id: user.id,
+            legajo: legajo,
+            apellido_nombre: apellidoNombre,
+            jerarquia: jerarquia
+          }
+        ]);
+      
+      if (error) {
+        msg('Error al guardar el perfil: ' + error.message);
+      } else {
+        msg('Perfil guardado exitosamente. Bienvenido!');
+        // Aquí podrías redirigir a otra página o hacer algo más
+      }
+      
+      // Limpiar localStorage
+      localStorage.removeItem('legajo');
+      localStorage.removeItem('apellidoNombre');
+      localStorage.removeItem('jerarquia');
+    }
+  }
+});
+
+/* Modificar loginGoogle para guardar datos en localStorage antes del redirect */
+async function loginGoogle() {
+  const legajo = document.getElementById('legajo').value.trim();
+  const apellidoNombre = document.getElementById('apellidoNombre').value.trim();
+  const jerarquia = document.getElementById('jerarquia').value;
+  
+  if (!legajo || !apellidoNombre || !jerarquia) {
+    msg('Complete todos los campos antes de ingresar.');
+    return;
+  }
+  
+  // Guardar en localStorage para usar después del redirect
+  localStorage.setItem('legajo', legajo);
+  localStorage.setItem('apellidoNombre', apellidoNombre);
+  localStorage.setItem('jerarquia', jerarquia);
+  
+  const { error } = await client.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: window.location.href
+    }
+  });
+  
+  if (error) {
+    msg(error.message);
+  }
 }
 
 /* HELPER: mostrar mensaje */
