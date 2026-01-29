@@ -3,9 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Ingreso al Sistema</title>
-
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -23,42 +20,41 @@
 
 <p id="msg"></p>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-  // Conexión Supabase
+  // 👇 ESTA VARIABLE SE DECLARA UNA SOLA VEZ
   const supabase = supabaseJs.createClient(
     "https://otehkbvjoxxdikfrlldj.supabase.co",
     "sb_publishable_M2pH2HrqRmYEXxgGAnMdRg_Y_7gupVv"
   );
 
-  // Esperar a que cargue TODO el DOM
-  document.addEventListener("DOMContentLoaded", () => {
+  // REGISTRO
+  document.getElementById("btn-registrar").addEventListener("click", async () => {
+    const email = document.getElementById("reg-email").value;
+    const pass = document.getElementById("reg-pass").value;
 
-    document.getElementById("btn-registrar").addEventListener("click", async () => {
-      const email = document.getElementById("reg-email").value;
-      const pass = document.getElementById("reg-pass").value;
-
-      const { error } = await supabase.auth.signUp({
-        email: email,
-        password: pass
-      });
-
-      document.getElementById("msg").innerText =
-        error ? error.message : "Registro exitoso (revisá el mail)";
+    const { error } = await supabase.auth.signUp({
+      email,
+      password: pass
     });
 
-    document.getElementById("btn-login").addEventListener("click", async () => {
-      const email = document.getElementById("log-email").value;
-      const pass = document.getElementById("log-pass").value;
+    document.getElementById("msg").innerText =
+      error ? error.message : "Registro exitoso";
+  });
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: pass
-      });
+  // LOGIN
+  document.getElementById("btn-login").addEventListener("click", async () => {
+    const email = document.getElementById("log-email").value;
+    const pass = document.getElementById("log-pass").value;
 
-      document.getElementById("msg").innerText =
-        error ? error.message : "Login correcto";
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password: pass
     });
 
+    document.getElementById("msg").innerText =
+      error ? error.message : "Login correcto";
   });
 </script>
 
