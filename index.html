@@ -20,12 +20,12 @@
 
 <p id="msg"></p>
 
-<!-- CARGA SUPABASE -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- SUPABASE V2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <script>
-/* NO redeclaramos const supabase */
-window.supabase = supabaseJs.createClient(
+/* crear cliente */
+const client = supabase.createClient(
   "https://otehkbvjoxxdikfrlldj.supabase.co",
   "sb_publishable_M2pH2HrqRmYEXxgGAnMdRg_Y_7gupVv"
 );
@@ -34,8 +34,8 @@ async function registrar() {
   const email = document.getElementById("reg-email").value;
   const pass = document.getElementById("reg-pass").value;
 
-  const { error } = await window.supabase.auth.signUp({
-    email,
+  const { error } = await client.auth.signUp({
+    email: email,
     password: pass
   });
 
@@ -47,8 +47,8 @@ async function login() {
   const email = document.getElementById("log-email").value;
   const pass = document.getElementById("log-pass").value;
 
-  const { error } = await window.supabase.auth.signInWithPassword({
-    email,
+  const { error } = await client.auth.signInWithPassword({
+    email: email,
     password: pass
   });
 
