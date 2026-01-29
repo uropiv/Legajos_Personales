@@ -31,24 +31,40 @@ const client = supabase.createClient(
 );
 
 async function registrar() {
-  const email = document.getElementById("reg-email").value;
-  const pass = document.getElementById("reg-pass").value;
+  const email = document.getElementById("reg-email").value.trim();
+  const pass = document.getElementById("reg-pass").value.trim();
+
+  if (!email || !pass) {
+    document.getElementById("msg").innerText = "Completa todos los campos";
+    return;
+  }
+
+  if (pass.length < 6) {
+    document.getElementById("msg").innerText =
+      "La contraseña debe tener al menos 6 caracteres";
+    return;
+  }
 
   const { error } = await client.auth.signUp({
-    email: email,
+    email,
     password: pass
   });
 
   document.getElementById("msg").innerText =
-    error ? error.message : "Registro exitoso";
+    error ? error.message : "Registro exitoso (revisá tu email si pide confirmación)";
 }
 
 async function login() {
-  const email = document.getElementById("log-email").value;
-  const pass = document.getElementById("log-pass").value;
+  const email = document.getElementById("log-email").value.trim();
+  const pass = document.getElementById("log-pass").value.trim();
+
+  if (!email || !pass) {
+    document.getElementById("msg").innerText = "Completa todos los campos";
+    return;
+  }
 
   const { error } = await client.auth.signInWithPassword({
-    email: email,
+    email,
     password: pass
   });
 
@@ -57,5 +73,7 @@ async function login() {
 }
 </script>
 
+
 </body>
 </html>
+
